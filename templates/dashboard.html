@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Linux System Audit Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            background: #f4f6fb;
+            color: #222;
+        }
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 230px;
+            background: #2d3748;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1rem 1rem 1.5rem;
+            box-shadow: 2px 0 8px rgba(44,62,80,0.04);
+        }
+        .sidebar h2 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+        .sidebar li {
+            margin-bottom: 1.2rem;
+        }
+        .sidebar a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            display: block;
+            transition: background 0.2s, color 0.2s;
+        }
+        .sidebar a.active, .sidebar a:hover {
+            background: #4fd1c5;
+            color: #222;
+        }
+        .sidebar .admin {
+            display: flex;
+            align-items: center;
+            margin-top: 2rem;
+        }
+        .sidebar .admin img {
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            margin-right: 0.7rem;
+        }
+        .main {
+            flex: 1;
+            padding: 2.5rem 3rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+        .main-header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+        .main-header button {
+            background: #4fd1c5;
+            color: #222;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .main-header button:hover {
+            background: #38b2ac;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.06);
+            padding: 1.5rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .stat-card h5 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 0 0 0.5rem 0;
+            color: #718096;
+        }
+        .stat-card .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+        .stat-card.passed { border-left: 5px solid #38b2ac; }
+        .stat-card.failed { border-left: 5px solid #e53e3e; }
+        .stat-card.warning { border-left: 5px solid #ecc94b; }
+        .stat-card.info { border-left: 5px solid #4299e1; }
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.06);
+            padding: 1.5rem 1.2rem;
+        }
+        .card-header {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #2d3748;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+        th, td {
+            padding: 0.9rem 0.7rem;
+            text-align: left;
+        }
+        th {
+            background: #f4f6fb;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        tr {
+            border-bottom: 1px solid #e2e8f0;
+        }
+        tr:last-child {
+            border-bottom: none;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.35em 0.8em;
+            font-size: 0.95em;
+            border-radius: 0.5em;
+            font-weight: 600;
+        }
+        .bg-success { background: #38b2ac; color: #fff; }
+        .bg-danger { background: #e53e3e; color: #fff; }
+        .bg-warning { background: #ecc94b; color: #222; }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 10px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+        
+        .modal-header {
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        
+        .modal-body {
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 900px) {
+            .main { padding: 1.2rem; }
+        }
+        @media (max-width: 700px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; padding: 1rem; }
+            .sidebar ul { display: flex; flex-direction: row; }
+            .sidebar li { margin: 0 0.7rem 0 0; }
+            .main { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div>
+                <h2>SysAudit</h2>
+                <ul>
+                    <li><a href="/dashboard" class="active">Dashboard</a></li>
+
+                    <li><a href="/remote_audit">Remote Audit</a></li>
+                    <li><a href="#">System Info</a></li>
+                    <li><a href="#">Security Checks</a></li>
+                    <li><a href="#">Services</a></li>
+                    <li><a href="#">Logs</a></li>
+                </ul>
+            </div>
+            <div class="admin">
+                <img src="https://avatars.githubusercontent.com/u/9919?s=40&v=4" alt="Admin">
+                <span>{{ session.username }}</span>
+            </div>
+        </nav>
+        <!-- Main Content -->
+                {% block content %}
+
+        <main class="main">
+            <div class="main-header">
+                <h1>System Audit Dashboard</h1>
+                <button id="run-audit-btn">Run New Audit</button>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="stats">
+                <div class="stat-card passed">
+                    <h5>Passed Checks</h5>
+                    <div class="stat-value">{{ stats.passed }}</div>
+                </div>
+                <div class="stat-card failed">
+                    <h5>Failed Checks</h5>
+                    <div class="stat-value">{{ stats.failed }}</div>
+                </div>
+                <div class="stat-card warning">
+                    <h5>Warnings</h5>
+                    <div class="stat-value">{{ stats.warning }}</div>
+                </div>
+                <div class="stat-card info">
+                    <h5>Total Checks</h5>
+                    <div class="stat-value">{{ stats.total }}</div>
+                </div>
+            </div>
+            
+            <!-- Recent Issues Table -->
+            <div class="card">
+                <div class="card-header">Recent Issues</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Check</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for issue in issues %}
+                        <tr>
+                            <td>{{ issue.check }}</td>
+                            <td>
+                                {% if issue.status == 'Passed' %}
+                                <span class="badge bg-success">Passed</span>
+                                {% elif issue.status == 'Failed' %}
+                                <span class="badge bg-danger">Failed</span>
+                                {% else %}
+                                <span class="badge bg-warning">Warning</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ issue.details }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Logout link -->
+            <div style="margin-top: 20px; text-align: right;">
+                <a href="/logout" style="color: #4a5568; text-decoration: none;">Logout</a>
+            </div>
+                    {% endblock %}
+
+        </main>
+    </div>
+    
+    <!-- Audit Report Modal -->
+    <div id="audit-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2>System Audit Report</h2>
+            </div>
+            <div id="modal-loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Running system audit...</p>
+                <p>This may take a few minutes</p>
+            </div>
+            <div id="modal-body" class="modal-body" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Modal functionality
+        const modal = document.getElementById("audit-modal");
+        const btn = document.getElementById("run-audit-btn");
+        const span = document.getElementsByClassName("close")[0];
+        const modalBody = document.getElementById("modal-body");
+        const modalLoading = document.getElementById("modal-loading");
+        
+        btn.onclick = function() {
+            modal.style.display = "block";
+            modalLoading.style.display = "block";
+            modalBody.style.display = "none";
+            
+            // Make AJAX request to run the audit
+            fetch('/run_audit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                modalLoading.style.display = "none";
+                modalBody.style.display = "block";
+                
+                if (data.success) {
+                    modalBody.textContent = data.report || "Audit completed successfully.";
+                    
+                    // Add email button after successful audit
+                    const emailBtn = document.createElement("button");
+                    emailBtn.textContent = "Send Report via Email";
+                    emailBtn.className = "email-btn";
+                    emailBtn.style.marginTop = "20px";
+                    emailBtn.style.padding = "10px 15px";
+                    emailBtn.style.backgroundColor = "#4fd1c5";
+                    emailBtn.style.border = "none";
+                    emailBtn.style.borderRadius = "6px";
+                    emailBtn.style.cursor = "pointer";
+                    emailBtn.onclick = function() {
+                        window.location.href = "/email_form";
+                    };
+                    
+                    modalBody.appendChild(document.createElement("br"));
+                    modalBody.appendChild(emailBtn);
+                    
+                    // If AI summary is available, display it
+                    if (data.ai_summary) {
+                        const summaryDiv = document.createElement("div");
+                        summaryDiv.className = "ai-summary";
+                        summaryDiv.style.marginTop = "30px";
+                        summaryDiv.style.padding = "15px";
+                        summaryDiv.style.backgroundColor = "#f0f9ff";
+                        summaryDiv.style.borderRadius = "6px";
+                        summaryDiv.style.borderLeft = "4px solid #4299e1";
+                        
+                        const summaryTitle = document.createElement("h3");
+                        summaryTitle.textContent = "AI Summary & Recommendations";
+                        summaryTitle.style.marginTop = "0";
+                        summaryTitle.style.color = "#2b6cb0";
+                        
+                        const summaryContent = document.createElement("div");
+                        summaryContent.innerHTML = data.ai_summary;
+                        
+                        summaryDiv.appendChild(summaryTitle);
+                        summaryDiv.appendChild(summaryContent);
+                        modalBody.appendChild(summaryDiv);
+                    }
+                } else {
+                    modalBody.textContent = `Error: ${data.message}\n${data.error || ''}`;
+                }
+            })
+            .catch(error => {
+                modalLoading.style.display = "none";
+                modalBody.style.display = "block";
+                modalBody.textContent = `Error: ${error.message}`;
+            });
+        }
+        
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+    
+</body>
+</html>
+

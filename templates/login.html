@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Automated System Audit Tool</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0e4166 0%, #0a2942 100%);
+    }
+    
+    .container {
+      max-width: 430px;
+      width: 100%;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .container .form {
+      padding: 30px;
+    }
+    
+    .container .form .title {
+      position: relative;
+      font-size: 27px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    
+    .container .form .title:before {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -10px;
+      height: 3px;
+      width: 30px;
+      background: #0e4166;
+    }
+    
+    .form .input-field {
+      position: relative;
+      height: 50px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    
+    .input-field input {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      padding: 0 35px;
+      border: none;
+      outline: none;
+      border-bottom: 2px solid #ccc;
+      border-top: 2px solid transparent;
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+    
+    .input-field input:is(:focus, :valid) {
+      border-bottom-color: #0e4166;
+    }
+    
+    .input-field i {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      font-size: 20px;
+    }
+    
+    .input-field input:is(:focus, :valid) ~ i {
+      color: #0e4166;
+    }
+    
+    .input-field i.icon {
+      left: 0;
+    }
+    
+    .input-field i.showHidePw {
+      right: 0;
+      cursor: pointer;
+      padding: 10px;
+    }
+    
+    .form .checkbox-text {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    
+    .checkbox-text .checkbox-content {
+      display: flex;
+      align-items: center;
+    }
+    
+    .checkbox-content input {
+      margin: 0 8px -2px 4px;
+      accent-color: #0e4166;
+    }
+    
+    .form .text {
+      color: #333;
+      font-size: 14px;
+    }
+    
+    .form a.text {
+      color: #0e4166;
+      text-decoration: none;
+    }
+    
+    .form a:hover {
+      text-decoration: underline;
+    }
+    
+    .form .button {
+      margin-top: 35px;
+    }
+    
+    .form .button input {
+      border: none;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      border-radius: 6px;
+      background-color: #0e4166;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .button input:hover {
+      background-color: #0a2942;
+    }
+    
+    .form .login-signup {
+      margin-top: 30px;
+      text-align: center;
+    }
+    
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #0e4166;
+    }
+    
+    .logo-icon {
+      font-size: 30px;
+      margin-right: 10px;
+    }
+    
+    .subtitle {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .error-message {
+      color: #e53e3e;
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="form login">
+      <div class="logo">
+        <i class="fas fa-shield-alt logo-icon"></i> System Audit Tool
+      </div>
+      <div class="subtitle">
+        Secure Server Analysis & Vulnerability Detection
+      </div>
+      <span class="title">Login</span>
+
+      {% if error %}
+      <div class="error-message">
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <form action="/login" method="POST">
+        <div class="input-field">
+          <input type="text" name="username" placeholder="Enter your username" required>
+          <i class="fas fa-user icon"></i>
+        </div>
+        
+        <div class="input-field">
+          <input type="password" name="password" class="password" placeholder="Enter your password" required>
+          <i class="fas fa-lock icon"></i>
+          <i class="fas fa-eye-slash showHidePw"></i>
+        </div>
+
+        <div class="checkbox-text">
+          <div class="checkbox-content">
+            <input type="checkbox" id="logCheck">
+            <label for="logCheck" class="text">Remember me</label>
+          </div>
+          
+          <a href="#" class="text">Forgot password?</a>
+        </div>
+
+        <div class="input-field button">
+          <input type="submit" value="Login">
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const pwShowHide = document.querySelector(".showHidePw");
+    const pwField = document.querySelector(".password");
+
+    pwShowHide.addEventListener("click", () => {
+      if (pwField.type === "password") {
+        pwField.type = "text";
+        pwShowHide.classList.replace("fa-eye-slash", "fa-eye");
+      } else {
+        pwField.type = "password";
+        pwShowHide.classList.replace("fa-eye", "fa-eye-slash");
+      }
+    });
+  </script>
+</body>
+</html>

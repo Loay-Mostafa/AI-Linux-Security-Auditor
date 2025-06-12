@@ -1,0 +1,24 @@
+{% extends 'dashboard.html' %}
+
+{% block content %}
+<div class="email-form-container">
+    <h2>Send Audit Report</h2>
+    <p>Enter your email address to receive the audit report:</p>
+    <form id="email-form" method="post" action="/send_report">
+        <div class="form-group">
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email" required class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="format">Report Format:</label>
+            <select id="format" name="format" class="form-control">
+                <option value="pdf">PDF</option>
+                <option value="html">HTML</option>
+            </select>
+        </div>
+        <input type="hidden" name="report_file" id="report-file-input">
+        <button type="submit" class="btn btn-primary">Send Report</button>
+    </form>
+    <div id="email-status" style="margin-top: 15px; display: none;"></div>
+</div>
+{% endblock %}

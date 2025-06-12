@@ -1,54 +1,32 @@
-# 🤖 AI Linux Security Auditor
+# Enhanced Linux System Audit Tool
 
-> A smart Flask-based web application for auditing Linux systems.  
-> Combines traditional security checks with **AI-powered analysis** to deliver actionable insights, remote audit support, and email reporting—all through a sleek web dashboard.
+This project is a Flask-based web application that runs system security audits on Linux servers. It has been enhanced with several new features to improve security assessment and reporting capabilities.
 
----
+## Features
 
-## 🚀 Features
-
-### 🔐 Password Security Checks
+### 1. Password Security Checks
 - Detects empty or default passwords
-- Validates `/etc/shadow` file permissions
+- Checks /etc/shadow permissions and exposure
 - Scans for plaintext passwords in config files
-- Evaluates current password policy settings
+- Evaluates password policy settings
 
-### 📧 Email Report Delivery
-- Prompts user for recipient email after audit
-- Converts reports to **HTML** or **PDF**
-- Sends formatted report as an email attachment
-- Includes a brief summary in the email body
+### 2. Email Report Delivery
+- Prompts for email address after audit completion
+- Converts audit reports to HTML or PDF format
+- Sends formatted reports as email attachments
+- Includes summary in the email body
 
-### 🤖 AI-Powered Analysis & Recommendations
-- Analyzes audit results using **OpenAI API** or local rules
-- Highlights critical findings
+### 3. AI Summary & Recommendations
+- Analyzes audit results using AI (OpenAI API or local analysis)
+- Extracts critical findings from the report
 - Generates actionable recommendations
-- Displays insights in the dashboard and email
+- Displays AI insights in the dashboard and includes them in emailed reports
 
-### 🔒 Remote SSH Audit Support
-- Audit remote Linux servers over SSH
-- Supports password & key-based authentication
-- Securely transfers and runs audit scripts
-- Retrieves and analyzes remote results
-
----
-
-## 📸 Screenshots
-
-### 🖥️ Dashboard Interface
-
-![Dashboard 1](images/dashboard1.png)  
-*Main dashboard showing system audit overview.*
-
-
-### 📧 Email Report
-
-![Email Report](images/email_report.png)  
-*Example of the formatted email report with summary and attachment.*
-
----
-
-## ⚙️ Setup Instructions
+### 4. SSH Remote Audit Support
+- Allows auditing of remote machines via SSH
+- Supports both password and key-based authentication
+- Securely uploads and executes the audit script remotely
+- Fetches and processes remote audit results
 
 ## Setup Instructions
 
@@ -104,4 +82,3 @@ python app.py
 - `audit_analyzer.py`: AI-powered analysis of audit reports
 - `remote_audit.py`: Handles SSH connections and remote script execution
 - `templates/`: HTML templates for the web interface
-
